@@ -4,7 +4,7 @@ import TopBar from "./TopBar";
 import AddAppointmentModal from "./AddAppointmentModal";
 import AppointmentsTable from "./AppointmentsTable";
 import API from "../api/axios";
-import { Appointment, Patient, User } from "../types";
+import { Appointment, Patient } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import AppointmentDetailsModal from "./AppointmentDetailsModal";
 
@@ -15,7 +15,6 @@ const Content: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState<User | null>(null);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
 
@@ -26,21 +25,6 @@ const Content: React.FC = () => {
   const [doctorName, setDoctorName] = useState("");
   const [medicalCondition, setMedicalCondition] = useState("");
   const [consultationDate, setConsultationDate] = useState("");
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user?.token) {
-        try {
-          const response = await API.get(`/auth/me`);
-          setUserData(response.data.data);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [user]);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -139,7 +123,7 @@ const Content: React.FC = () => {
       <div className="flex justify-between px-4 sm:px-0 pb-4 border-b border-gray-200">
         <div className="">
           <p className="text-xl font-bold font-bricolage">
-            Welcome, {userData?.name.split(" ")[0]}
+            Welcome, {user?.name?.split(" ")[0]}
           </p>
           <p className="text-sm">
             {user?.role === "officer"
@@ -211,9 +195,10 @@ const Content: React.FC = () => {
           </div>
         </>
       ) : (
-        <div className="flex-1 p-2">
-          <AppointmentsTable />
-        </div>
+
+          <div className="flex-1 p-2">
+            <AppointmentsTable />
+          </div>
       )}
 
       {selectedAppointment && (

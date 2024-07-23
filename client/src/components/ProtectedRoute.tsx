@@ -1,23 +1,34 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect } from "react";
+import API from "../api/axios";
 
 interface ProtectedRoutesProps {
   requiredRoles: string[];
 }
 
 const ProtectedRoutes: React.FC<ProtectedRoutesProps> = ({ requiredRoles }) => {
-  const { user } = useAuth();
+  const navigate = useNavigate()
+  const {setUser} = useAuth()
 
-  const location = useLocation();
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await API.get("/auth/me");
+        console.log(response.data)
+        if (response.status !== 200) navigate("/")
+        setUser(response.data.data)
+        if (requiredRoles.length > 0 && response.data.data && !requiredRoles.includes(response.data.data.role)) {
+          navigate("/")
+        }
+      } catch (error) {
+        console.error("Failed to fetch user", error);
+        navigate("/")
+      }
+    };
 
-  if (!user) {
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
-
-  // if required roles does not include user role
-  if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
+    fetchUser()
+  }, [navigate])
 
   return <Outlet />;
 };
