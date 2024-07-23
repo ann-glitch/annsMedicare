@@ -18,6 +18,7 @@ const errorResponse_1 = __importDefault(require("../utils/errorResponse"));
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const sendEmail_1 = __importDefault(require("../utils/sendEmail"));
 const User_1 = __importDefault(require("../models/User"));
+const Token_1 = __importDefault(require("../models/Token"));
 // @description  Register User
 // @route   POST /api/v1/auth/register
 // @access  public
@@ -52,9 +53,16 @@ exports.login = (0, express_async_handler_1.default)((req, res, next) => __await
 // @route   GET /api/v1/auth/logout
 // @access  private
 exports.logout = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.cookie("token", "none", {
-        expires: new Date(Date.now() + 10 * 1000),
+    var _a;
+    const token = req.cookies.token || ((_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1]);
+    if (token) {
+        // Save the token to the blacklist
+        yield new Token_1.default({ token, expiresAt: new Date(Date.now() + 10 * 1000) }).save();
+    }
+    res.cookie("token", "", {
+        expires: new Date(0),
         httpOnly: true,
+        secure: process.env.NODE_ENV == "production"
     });
     res.status(200).json({
         success: true,

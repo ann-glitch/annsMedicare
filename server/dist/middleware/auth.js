@@ -17,6 +17,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const errorResponse_1 = __importDefault(require("../utils/errorResponse"));
 const User_1 = __importDefault(require("../models/User"));
+const Token_1 = __importDefault(require("../models/Token"));
 exports.protect = (0, express_async_handler_1.default)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let token;
     if (req.headers.authorization &&
@@ -27,6 +28,11 @@ exports.protect = (0, express_async_handler_1.default)((req, res, next) => __awa
     else if (req.cookies.token) {
         // Set token from cookie
         token = req.cookies.token;
+    }
+    // Check if the token is in the blacklist
+    const blacklistedToken = yield Token_1.default.findOne({ token });
+    if (blacklistedToken) {
+        return next(new errorResponse_1.default('Not authorized, token has been revoked', 401));
     }
     // Make sure token exists
     if (!token) {

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import ErrorResponse from "../utils/errorResponse";
 import User, { UserDocument } from "../models/User";
+import Token from "../models/Token";
 
 interface AuthRequest extends Request {
   user?: UserDocument;
@@ -22,6 +23,12 @@ export const protect = asyncHandler(
       // Set token from cookie
       token = req.cookies.token;
     }
+    
+     // Check if the token is in the blacklist
+     const blacklistedToken = await Token.findOne({ token });
+     if (blacklistedToken) {
+       return next(new ErrorResponse('Not authorized, token has been revoked', 401));
+     }
 
     // Make sure token exists
     if (!token) {

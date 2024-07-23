@@ -4,6 +4,7 @@ import ErrorResponse from "../utils/errorResponse";
 import asyncHandler from "express-async-handler";
 import sendEmail from "../utils/sendEmail";
 import User, { UserDocument } from "../models/User";
+import Token from "../models/Token";
 
 // @description  Register User
 // @route   POST /api/v1/auth/register
@@ -56,9 +57,17 @@ export const login = asyncHandler(
 // @access  private
 export const logout = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    res.cookie("token", "none", {
-      expires: new Date(Date.now() + 10 * 1000),
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    if (token) {
+      // Save the token to the blacklist
+      await new Token({ token, expiresAt: new Date(Date.now() + 10 * 1000) }).save();
+    }
+
+    res.cookie("token", "", {
+      expires: new Date(0),
       httpOnly: true,
+      secure : process.env.NODE_ENV == "production"
     });
 
     res.status(200).json({
