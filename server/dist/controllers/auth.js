@@ -86,6 +86,9 @@ exports.updateDetails = (0, express_async_handler_1.default)((req, res, next) =>
     const fieldsToUpdate = {
         name: req.body.name,
         email: req.body.email,
+        gender: req.body.gender,
+        dateOfBirth: req.body.dateOfBirth,
+        phoneNumber: req.body.phoneNumber
     };
     const user = yield User_1.default.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
         new: true,
@@ -121,16 +124,17 @@ exports.forgotPassword = (0, express_async_handler_1.default)((req, res, next) =
     // Get reset token
     const resetToken = user.getResetPasswordToken();
     yield user.save({ validateBeforeSave: false });
-    // Create reset url
-    const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${resetToken}`;
-    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a request to the url below and enter your new password. \n\n ${resetUrl}`;
+    // create reset url
+    const resetUrl = `${process.env.resetPasswordUrl}/${resetToken}`;
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password.\n
+    Please make a request to the url below and enter your new password. \n\n ${resetUrl}`;
     try {
         yield (0, sendEmail_1.default)({
             email: user.email,
             subject: "Password reset token",
             message,
         });
-        res.status(200).json({ success: true, data: "Email sent!" });
+        res.status(200).json({ success: true, data: "Email sent!", token: resetToken });
     }
     catch (err) {
         console.log(err);
@@ -153,6 +157,7 @@ exports.resetPassword = (0, express_async_handler_1.default)((req, res, next) =>
         resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() },
     });
+    console.log("resetting password...");
     if (!user) {
         return next(new errorResponse_1.default("Invalid token", 400));
     }

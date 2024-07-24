@@ -99,6 +99,9 @@ export const updateDetails = asyncHandler(
     const fieldsToUpdate = {
       name: req.body.name,
       email: req.body.email,
+      gender: req.body.gender,
+      dateOfBirth: req.body.dateOfBirth,
+      phoneNumber: req.body.phoneNumber
     };
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
@@ -148,12 +151,11 @@ export const forgotPassword = asyncHandler(
 
     await user.save({ validateBeforeSave: false });
 
-    // Create reset url
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/v1/auth/resetpassword/${resetToken}`;
+    // create reset url
+    const resetUrl = `${process.env.resetPasswordUrl}/${resetToken}`;
 
-    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a request to the url below and enter your new password. \n\n ${resetUrl}`;
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password.\n
+    Please make a request to the url below and enter your new password. \n\n ${resetUrl}`;
 
     try {
       await sendEmail({
@@ -161,7 +163,7 @@ export const forgotPassword = asyncHandler(
         subject: "Password reset token",
         message,
       });
-      res.status(200).json({ success: true, data: "Email sent!" });
+      res.status(200).json({ success: true, data: "Email sent!", token : resetToken });
     } catch (err) {
       console.log(err);
       user.resetPasswordToken = undefined;
@@ -189,6 +191,7 @@ export const resetPassword = asyncHandler(
       resetPasswordToken,
       resetPasswordExpire: { $gt: Date.now() },
     });
+    console.log("resetting password...")
 
     if (!user) {
       return next(new ErrorResponse("Invalid token", 400));
