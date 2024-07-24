@@ -7,6 +7,8 @@ import ProtectedRoutes from "./components/ProtectedRoute";
 import OfficerDashboard from "./pages/OfficerDashboard";
 import Signup from "./pages/Signup";
 import { Toaster } from "sonner";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const App: React.FC = () => (
   <AuthProvider>
@@ -15,6 +17,8 @@ const App: React.FC = () => (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgotpassword" element={<ForgotPassword />} />
+      <Route path="/resetpassword/:token" element={<ResetPassword />} />
 
       {/* patient routes */}
       <Route element={<ProtectedRoutes requiredRoles={["user"]} />}>

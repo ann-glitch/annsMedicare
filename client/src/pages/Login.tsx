@@ -128,6 +128,10 @@ export default function Login() {
             Login
           </button>
 
+          <Link to={"forgotpassword"} className="py-4 block">
+            <span className="text-primaryGreen">Forgot your password?</span>
+          </Link>
+
           <Link to={"signup"} className="py-4 block">
             Don&apos;t have an account?{" "}
             <span className="text-primaryGreen">Sign Up</span>
