@@ -60,6 +60,8 @@ app.get("/", (req, res) => {
 app.use("/api/v1/patients", patients_1.default);
 app.use("/api/v1/auth", auth_1.default);
 app.use("/api/v1/consultation", consultations_1.default);
+// Import and initialize tasks
+require("./tasks/cleanupTokens");
 //error handler middleware
 app.use(error_1.default);
 const server = app.listen(port, () => {

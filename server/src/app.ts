@@ -73,6 +73,9 @@ app.use("/api/v1/patients", patients);
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/consultation", consultation)
 
+// Import and initialize tasks
+import './tasks/cleanupTokens';
+
 //error handler middleware
 app.use(errorHandler);
 
